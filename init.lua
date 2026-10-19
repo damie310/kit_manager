@@ -72,10 +72,15 @@ end
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if formname ~= modname .. ":admin" then return false end
     local name = player:get_player_name()
+
+    -- Never trust client-submitted formspec fields for authorization.
+    -- Check privileges before processing any action that can create, give, or
+    -- delete a kit; custom formspec submissions must not bypass this gate.
     if not minetest.check_player_privs(name, { server = true }) then
         minetest.chat_send_player(name, "You need the server privilege to manage kits.")
         return true
     end
+
     local kits = get_kits()
     if fields.kit_list then
         local event = minetest.explode_textlist_event(fields.kit_list)
